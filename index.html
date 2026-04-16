@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termo-Conecta 5 | Duelo de Bachillerato</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React y ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel para transpilar JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { height: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(49, 46, 129, 0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; border: 2px solid #312e81; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+        
+        /* Animación para el overlay */
+        .quiz-overlay {
+            backdrop-filter: blur(4px);
+            background-color: rgba(15, 23, 42, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // Base de datos de preguntas expandida (62 preguntas en total)
+        const QUESTIONS_DATABASE = [
+            // SISTEMAS
+            { q: "Un motor de coche que quema combustible y expulsa gases es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
+            { q: "Una bombilla encendida (deja pasar luz y calor pero no gas) es:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "El universo entero, por definición, se considera un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 2, cat: "Sistemas" },
+            { q: "Un globo de helio sellado (no pierde gas pero intercambia calor) es:", a: ["Cerrado", "Abierto", "Aislado"], correct: 0, cat: "Sistemas" },
+            { q: "Una olla a presión con la válvula silbando es un sistema:", a: ["Cerrado", "Abierto", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "El cuerpo humano es un ejemplo de sistema:", a: ["Cerrado", "Abierto", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "El Sol es un ejemplo de sistema:", a: ["Cerrado", "Abierto (emite partículas)", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "Un termo perfectamente sellado al vacío se aproxima a un sistema:", a: ["Cerrado", "Abierto", "Aislado"], correct: 2, cat: "Sistemas" },
+            { q: "Una batería de celular que se descarga alimentando el móvil es:", a: ["Abierto", "Cerrado", "Adiabático"], correct: 1, cat: "Sistemas" },
+            { q: "Un sistema que intercambia energía pero su masa permanece constante es:", a: ["Cerrado", "Abierto", "Aislado"], correct: 0, cat: "Sistemas" },
+            { q: "Una botella de agua mineral cerrada que se calienta al sol es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "Un motor de reacción (jet) que absorbe aire y expulsa gases es:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
+            { q: "Una planta en una maceta (respira, absorbe agua y luz) es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
+            { q: "Un foco LED (entra electricidad, sale luz y calor, no masa) es:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "Un cilindro con pistón móvil hermético es un ejemplo de sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
+            
+            // TRABAJO
+            { q: "Si un gas se expande y empuja un pistón, el sistema:", a: ["Realiza trabajo (+W)", "Recibe trabajo (-W)", "No cambia su volumen"], correct: 0, cat: "Trabajo" },
+            { q: "Al comprimir un gas en una jeringa, el gas:", a: ["Realiza trabajo", "Recibe trabajo (+W)", "Mantiene su energía"], correct: 1, cat: "Trabajo" },
+            { q: "En un proceso isocórico (volumen constante), el trabajo es:", a: ["Máximo", "Positivo", "Cero"], correct: 2, cat: "Trabajo" },
+            { q: "Al inflarse un globo solo por calor, el gas interno:", a: ["Realiza trabajo de expansión", "Recibe trabajo del entorno", "Es adiabático"], correct: 0, cat: "Trabajo" },
+            { q: "Si pisas una lata vacía y la aplastas, el aire interno:", a: ["Recibe trabajo del entorno", "Realiza trabajo sobre el pie", "Es un sistema aislado"], correct: 0, cat: "Trabajo" },
+            { q: "Si un gas se comprime rápido y su temperatura sube sin entrar calor, es:", a: ["Isotérmico", "Exotérmico", "Adiabático"], correct: 2, cat: "Trabajo" },
+            { q: "Al inflar una llanta, el calentamiento del aire se debe principalmente a:", a: ["Trabajo de compresión", "Calor del ambiente", "Fricción únicamente"], correct: 0, cat: "Trabajo" },
+            { q: "En una expansión libre (al vacío), el trabajo realizado por el gas es:", a: ["Máximo", "Cero", "Negativo"], correct: 1, cat: "Trabajo" },
+            { q: "Si el émbolo de un motor baja por la explosión de la mezcla, el sistema:", a: ["Realiza trabajo (+W)", "Recibe trabajo (-W)", "Es isocórico"], correct: 0, cat: "Trabajo" },
+            { q: "Un resorte comprimido que empuja un gas dentro de un cilindro:", a: ["Realiza trabajo sobre el gas", "Recibe trabajo del gas", "Mantiene su energía"], correct: 0, cat: "Trabajo" },
+            { q: "El área bajo la curva en un diagrama Presión vs Volumen (P-V) representa:", a: ["La Temperatura", "El Trabajo realizado", "La Masa"], correct: 1, cat: "Trabajo" },
+            { q: "Si un pistón se mueve aumentando el volumen, el trabajo (según el sistema) es:", a: ["Positivo", "Negativo", "Cero"], correct: 0, cat: "Trabajo" },
+            { q: "¿En qué proceso el cambio de energía interna es igual al calor (W=0)?", a: ["Isobárico", "Isotérmico", "Isocórico"], correct: 2, cat: "Trabajo" },
+            { q: "Un globo que estalla realiza un trabajo de expansión contra:", a: ["El vacío", "La atmósfera", "Nada"], correct: 1, cat: "Trabajo" },
+            { q: "Cuando un gas se comprime a presión constante, el trabajo es:", a: ["P * (Vfinal - Vinicial)", "Cero", "La mitad de la presión"], correct: 0, cat: "Trabajo" },
+
+            // CALOR
+            { q: "¿Cómo se llama el proceso donde el sistema libera calor?", a: ["Endotérmico", "Exotérmico", "Adiabático"], correct: 1, cat: "Calor" },
+            { q: "Si el sistema absorbe calor del entorno, el proceso es:", a: ["Exotérmico", "Endotérmico", "Isotérmico"], correct: 1, cat: "Calor" },
+            { q: "El equilibrio térmico se alcanza cuando dos cuerpos tienen igual:", a: ["Calor", "Masa", "Temperatura"], correct: 2, cat: "Calor" },
+            { q: "La combustión de gasolina en un motor es un proceso:", a: ["Endotérmico", "Exotérmico", "Adiabático"], correct: 1, cat: "Calor" },
+            { q: "La evaporación del sudor en la piel es un proceso:", a: ["Endotérmico (absorbe calor)", "Exotérmico", "Isocórico"], correct: 0, cat: "Calor" },
+            { q: "El calor necesario para elevar la temperatura sin cambiar el estado es:", a: ["Calor latente", "Calor sensible", "Calor específico"], correct: 1, cat: "Calor" },
+            { q: "La transferencia de calor a través de un sólido se llama:", a: ["Convección", "Radiación", "Conducción"], correct: 2, cat: "Calor" },
+            { q: "Si un proceso ocurre a temperatura constante, se denomina:", a: ["Isocórico", "Isotérmico", "Isobárico"], correct: 1, cat: "Calor" },
+            { q: "Un proceso en el que no hay intercambio de calor (Q=0) es:", a: ["Isotérmico", "Adiabático", "Exotérmico"], correct: 1, cat: "Calor" },
+            { q: "Cuando el hielo se derrite a 0°C, absorbe energía llamada:", a: ["Calor sensible", "Calor latente de fusión", "Calor específico"], correct: 1, cat: "Calor" },
+            { q: "La transferencia de calor por movimiento de fluidos (aire o agua) se llama:", a: ["Conducción", "Convección", "Radiación"], correct: 1, cat: "Calor" },
+            { q: "El calor necesario para que 1g de agua suba 1°C de temperatura es una:", a: ["Caloría", "Joule", "Watt"], correct: 0, cat: "Calor" },
+            { q: "¿En qué dirección fluye el calor de forma espontánea?", a: ["De frío a caliente", "De caliente a frío", "En ambas direcciones"], correct: 1, cat: "Calor" },
+            { q: "Un material que no conduce el calor fácilmente es un:", a: ["Conductor térmico", "Aislante térmico", "Semiconductor"], correct: 1, cat: "Calor" },
+            { q: "La radiación térmica se propaga mediante:", a: ["Contacto directo", "Ondas electromagnéticas", "Corrientes de aire"], correct: 1, cat: "Calor" },
+
+            // FRONTERAS
+            { q: "Una pared rígida impide que el sistema realice trabajo de:", a: ["Calor", "Expansión/Compresión", "Materia"], correct: 1, cat: "Fronteras" },
+            { q: "Una hielera de unicel es un ejemplo de frontera:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
+            { q: "Una membrana que permite el paso de agua pero no de sal es:", a: ["Impermeable", "Semipermeable", "Rígida"], correct: 1, cat: "Fronteras" },
+            { q: "La pared de un termo de vacío está diseñada para ser:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
+            { q: "Un neumático de coche que se calienta al rodar tiene frontera:", a: ["Diatérmica e Impermeable", "Adiabática y Permeable", "Rígida"], correct: 0, cat: "Fronteras" },
+            { q: "Un tanque de acero que no cambia su forma es una frontera:", a: ["Flexible", "Rígida", "Permeable"], correct: 1, cat: "Fronteras" },
+            { q: "Una frontera que cambia su posición debido a la presión es:", a: ["Rígida", "Flexible o Móvil", "Impermeable"], correct: 1, cat: "Fronteras" },
+            { q: "El papel filtro en un laboratorio es una frontera:", a: ["Impermeable", "Semipermeable", "Adiabática"], correct: 1, cat: "Fronteras" },
+            { q: "Un material aislante como la lana de vidrio forma una frontera:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
+            { q: "Una frontera que permite el equilibrio térmico entre sistemas es:", a: ["Adiabática", "Diatérmica", "Rígida"], correct: 1, cat: "Fronteras" },
+            { q: "Una bolsa de plástico que se deforma al calentarse el aire dentro es:", a: ["Frontera Rígida", "Frontera Flexible", "Frontera Adiabática"], correct: 1, cat: "Fronteras" },
+            { q: "Una frontera que impide totalmente el paso de materia es:", a: ["Impermeable", "Semipermeable", "Diatérmica"], correct: 0, cat: "Fronteras" },
+            { q: "Una frontera flexible y adiabática al mismo tiempo permite:", a: ["Paso de calor", "Cambio de volumen pero no calor", "Paso de masa"], correct: 1, cat: "Fronteras" },
+            { q: "La frontera que permite el paso de luz y calor se considera:", a: ["Adiabática", "Diatérmica", "Impermeable"], correct: 1, cat: "Fronteras" },
+            { q: "Un sistema aislado requiere una frontera impermeable, rígida y:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
+            { q: "El émbolo de una jeringa que se puede mover hacia adentro y afuera es:", a: ["Frontera Móvil", "Frontera Rígida", "Frontera Semipermeable"], correct: 0, cat: "Fronteras" },
+            { q: "Una red de pesca que deja pasar agua pero retiene peces es análoga a:", a: ["Frontera Impermeable", "Frontera Semipermeable", "Frontera Diatérmica"], correct: 1, cat: "Fronteras" }
+        ];
+
+        const ROWS = 7;
+        const COLS = 12;
+        const WIN_COUNT = 5;
+        const TIME_LIMIT = 20;
+
+        function App() {
+            const [gameState, setGameState] = useState('LOBBY');
+            const [p1Name, setP1Name] = useState('Jugador Rojo');
+            const [p2Name, setP2Name] = useState('Jugador Azul');
+            const [board, setBoard] = useState(Array(ROWS).fill(null).map(() => Array(COLS).fill(0)));
+            const [turn, setTurn] = useState(1);
+            const [activeQuiz, setActiveQuiz] = useState(null);
+            const [usedQuestions, setUsedQuestions] = useState([]);
+            const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
+            const [winner, setWinner] = useState(null);
+            const [log, setLog] = useState("¡Selecciona una columna!");
+
+            // Timer
+            useEffect(() => {
+                let timer;
+                if (activeQuiz && gameState === 'PLAYING') {
+                    if (timeLeft > 0) {
+                        timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+                    } else {
+                        handleTimeOut();
+                    }
+                }
+                return () => clearInterval(timer);
+            }, [activeQuiz, timeLeft, gameState]);
+
+            const handleTimeOut = () => {
+                setLog(`¡Tiempo agotado para ${turn === 1 ? p1Name : p2Name}!`);
+                setActiveQuiz(null);
+                setTurn(turn === 1 ? 2 : 1);
+            };
+
+            const checkWinner = (newBoard, r, c, p) => {
+                const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+                for (let [dr, dc] of directions) {
+                    let count = 1;
+                    let currR = r + dr, currC = c + dc;
+                    while (currR >= 0 && currR < ROWS && currC >= 0 && currC < COLS && newBoard[currR][currC] === p) {
+                        count++; currR += dr; currC += dc;
+                    }
+                    currR = r - dr; currC = c - dc;
+                    while (currR >= 0 && currR < ROWS && currC >= 0 && currC < COLS && newBoard[currR][currC] === p) {
+                        count++; currR -= dr; currC -= dc;
+                    }
+                    if (count >= WIN_COUNT) return true;
+                }
+                return false;
+            };
+
+            const handleColumnClick = (colIndex) => {
+                if (gameState !== 'PLAYING' || activeQuiz) return;
+                let rowIndex = -1;
+                for (let r = ROWS - 1; r >= 0; r--) {
+                    if (board[r][colIndex] === 0) { rowIndex = r; break; }
+                }
+                if (rowIndex === -1) return;
+
+                let available = QUESTIONS_DATABASE.filter((_, idx) => !usedQuestions.includes(idx));
+                if (available.length === 0) { setUsedQuestions([]); available = [...QUESTIONS_DATABASE]; }
+
+                const randomIndex = Math.floor(Math.random() * available.length);
+                const questionData = available[randomIndex];
+                const originalIndex = QUESTIONS_DATABASE.indexOf(questionData);
+
+                setTimeLeft(TIME_LIMIT);
+                setActiveQuiz({ ...questionData, rowIndex, colIndex, originalIndex });
+            };
+
+            const submitAnswer = (idx) => {
+                const isCorrect = idx === activeQuiz.correct;
+                const { rowIndex, colIndex, originalIndex } = activeQuiz;
+                const player = turn;
+
+                setUsedQuestions(prev => [...prev, originalIndex]);
+
+                if (isCorrect) {
+                    const newBoard = [...board.map(row => [...row])];
+                    newBoard[rowIndex][colIndex] = player;
+                    setBoard(newBoard);
+                    if (checkWinner(newBoard, rowIndex, colIndex, player)) {
+                        setWinner(player === 1 ? p1Name : p2Name);
+                        setGameState('GAME_OVER');
+                    } else {
+                        setLog(`¡Correcto! Turno de ${player === 1 ? p2Name : p1Name}.`);
+                        setTurn(player === 1 ? 2 : 1);
+                    }
+                } else {
+                    setLog(`¡Incorrecto! ${player === 1 ? p1Name : p2Name} falló.`);
+                    setTurn(player === 1 ? 2 : 1);
+                }
+                setActiveQuiz(null);
+            };
+
+            if (gameState === 'LOBBY') return (
+                <div className="min-h-screen flex items-center justify-center p-4">
+                    <div className="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl max-w-xl w-full border-t-[14px] border-indigo-600">
+                        <h1 className="text-4xl font-black italic text-center mb-6">TERMO-CONECTA 5</h1>
+                        <div className="space-y-4 mb-8">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-2">Jugador 1</label>
+                                <input type="text" value={p1Name} onChange={e => setP1Name(e.target.value)} className="w-full p-4 bg-red-50 border-2 border-red-100 rounded-2xl font-bold focus:border-red-500 outline-none" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-2">Jugador 2</label>
+                                <input type="text" value={p2Name} onChange={e => setP2Name(e.target.value)} className="w-full p-4 bg-blue-50 border-2 border-blue-100 rounded-2xl font-bold focus:border-blue-500 outline-none" />
+                            </div>
+                        </div>
+                        <button onClick={() => setGameState('PLAYING')} className="w-full bg-indigo-600 text-white font-black py-4 rounded-3xl text-xl shadow-xl hover:bg-indigo-700 transition-all">
+                            INICIAR DUELO
+                        </button>
+                    </div>
+                </div>
+            );
+
+            if (gameState === 'GAME_OVER') return (
+                <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 text-white text-center">
+                    <h2 className="text-6xl font-black italic mb-4 uppercase tracking-tighter">¡VICTORIA!</h2>
+                    <p className="text-4xl font-bold text-indigo-400 mb-10">{winner}</p>
+                    <button onClick={() => window.location.reload()} className="bg-white text-slate-900 px-12 py-4 rounded-full font-black text-xl hover:bg-indigo-50 transition-all">
+                        VOLVER A EMPEZAR
+                    </button>
+                </div>
+            );
+
+            return (
+                <div className="h-screen flex flex-col p-4 max-w-7xl mx-auto overflow-hidden relative">
+                    <header className="flex justify-between items-center mb-4 bg-white p-4 rounded-3xl shadow-md border-b-4 border-indigo-600">
+                        <h1 className="text-xl font-black italic uppercase hidden md:block">Termo <span className="text-indigo-600">Conecta 5</span></h1>
+                        <div className="flex gap-4">
+                            <div className={`px-4 py-2 rounded-xl border-2 transition-all ${turn === 1 ? 'bg-red-50 border-red-500 scale-105 shadow-sm' : 'bg-white opacity-40 grayscale'}`}>
+                                <p className="text-[10px] font-bold uppercase text-red-500">Turno de</p>
+                                <p className="font-bold text-xs">{p1Name}</p>
+                            </div>
+                            <div className={`px-4 py-2 rounded-xl border-2 transition-all ${turn === 2 ? 'bg-blue-50 border-blue-500 scale-105 shadow-sm' : 'bg-white opacity-40 grayscale'}`}>
+                                <p className="text-[10px] font-bold uppercase text-blue-500">Turno de</p>
+                                <p className="font-bold text-xs">{p2Name}</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex-1 flex flex-col overflow-hidden relative">
+                        <div className="bg-indigo-800 p-6 rounded-[2.5rem] shadow-2xl overflow-x-auto custom-scrollbar h-full">
+                            <div className="min-w-[800px] grid grid-cols-12 gap-3 h-full pb-8">
+                                {Array(COLS).fill(null).map((_, c) => (
+                                    <button 
+                                        key={c} 
+                                        onClick={() => handleColumnClick(c)} 
+                                        className="bg-indigo-700/50 hover:bg-indigo-400 h-10 rounded-t-2xl text-white font-bold transition-colors flex items-center justify-center"
+                                    >
+                                        ↓
+                                    </button>
+                                ))}
+                                {board.map((row, r) => row.map((cell, c) => (
+                                    <div key={`${r}-${c}`} className="aspect-square bg-indigo-900 rounded-full flex items-center justify-center border border-indigo-950/40 shadow-inner">
+                                        {cell !== 0 && (
+                                            <div className={`w-[85%] h-[85%] rounded-full shadow-lg border-2 flex items-center justify-center animate-in zoom-in duration-300 ${cell === 1 ? 'bg-gradient-to-br from-red-400 to-red-600 border-red-300' : 'bg-gradient-to-br from-blue-400 to-blue-600 border-blue-300'}`}>
+                                                <span className="text-white text-[10px] font-black opacity-30 uppercase">{cell === 1 ? 'Q+' : 'Q-'}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )))}
+                            </div>
+                        </div>
+                        <p className="text-center text-[10px] text-slate-400 mt-2 font-black uppercase italic tracking-[0.2em] animate-pulse">
+                            Desliza lateralmente para ver todo el tablero
+                        </p>
+                    </div>
+
+                    {/* QUIZ OVERLAY: El objetivo es que la pregunta siempre sea visible cuando aparece */}
+                    {activeQuiz && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 quiz-overlay animate-in fade-in duration-300">
+                            <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border-t-8 border-indigo-500 animate-in slide-in-from-bottom-10">
+                                <div className="p-8 md:p-12">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div className="bg-indigo-50 text-indigo-600 text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider">
+                                            Categoría: {activeQuiz.cat}
+                                        </div>
+                                        <div className={`flex items-center gap-2 px-6 py-2 rounded-full font-black text-xl shadow-sm ${timeLeft <= 5 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-slate-900 text-white'}`}>
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            {timeLeft}s
+                                        </div>
+                                    </div>
+                                    
+                                    <h3 className="text-2xl md:text-3xl font-black text-slate-800 mb-8 leading-tight">
+                                        {activeQuiz.q}
+                                    </h3>
+                                    
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {activeQuiz.a.map((opt, i) => (
+                                            <button 
+                                                key={i} 
+                                                onClick={() => submitAnswer(i)} 
+                                                className="w-full text-left p-6 rounded-3xl border-2 border-slate-100 hover:border-indigo-500 hover:bg-indigo-50 transition-all group relative overflow-hidden"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-bold text-lg text-slate-700 group-hover:text-indigo-700">{opt}</span>
+                                                    <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-indigo-500 group-hover:bg-indigo-500 transition-all"></div>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bg-slate-50 p-4 text-center">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Responde antes de que el tiempo se agote</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <footer className="mt-4 flex justify-between items-center bg-white p-3 rounded-2xl shadow-sm hidden md:flex">
+                         <div className="flex gap-4 text-[9px] font-black uppercase text-slate-400 italic">
+                            <span>Sistemas: Abierto/Cerrado</span>
+                            <span>Fronteras: Adiabática/Diatérmica</span>
+                         </div>
+                         <div className="text-[10px] font-black text-indigo-600 uppercase">
+                            Objetivo: Conectar 5 Fichas
+                         </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
