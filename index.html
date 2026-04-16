@@ -34,77 +34,62 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback } = React;
 
-        // Base de datos de preguntas expandida (62 preguntas en total)
+        // Base de datos de preguntas conceptuales (Bachillerato)
         const QUESTIONS_DATABASE = [
-            // SISTEMAS
-            { q: "Un motor de coche que quema combustible y expulsa gases es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
-            { q: "Una bombilla encendida (deja pasar luz y calor pero no gas) es:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
-            { q: "El universo entero, por definición, se considera un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 2, cat: "Sistemas" },
-            { q: "Un globo de helio sellado (no pierde gas pero intercambia calor) es:", a: ["Cerrado", "Abierto", "Aislado"], correct: 0, cat: "Sistemas" },
-            { q: "Una olla a presión con la válvula silbando es un sistema:", a: ["Cerrado", "Abierto", "Aislado"], correct: 1, cat: "Sistemas" },
-            { q: "El cuerpo humano es un ejemplo de sistema:", a: ["Cerrado", "Abierto", "Aislado"], correct: 1, cat: "Sistemas" },
-            { q: "El Sol es un ejemplo de sistema:", a: ["Cerrado", "Abierto (emite partículas)", "Aislado"], correct: 1, cat: "Sistemas" },
-            { q: "Un termo perfectamente sellado al vacío se aproxima a un sistema:", a: ["Cerrado", "Abierto", "Aislado"], correct: 2, cat: "Sistemas" },
-            { q: "Una batería de celular que se descarga alimentando el móvil es:", a: ["Abierto", "Cerrado", "Adiabático"], correct: 1, cat: "Sistemas" },
-            { q: "Un sistema que intercambia energía pero su masa permanece constante es:", a: ["Cerrado", "Abierto", "Aislado"], correct: 0, cat: "Sistemas" },
-            { q: "Una botella de agua mineral cerrada que se calienta al sol es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
-            { q: "Un motor de reacción (jet) que absorbe aire y expulsa gases es:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
-            { q: "Una planta en una maceta (respira, absorbe agua y luz) es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
-            { q: "Un foco LED (entra electricidad, sale luz y calor, no masa) es:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
-            { q: "Un cilindro con pistón móvil hermético es un ejemplo de sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
-            
-            // TRABAJO
-            { q: "Si un gas se expande y empuja un pistón, el sistema:", a: ["Realiza trabajo (+W)", "Recibe trabajo (-W)", "No cambia su volumen"], correct: 0, cat: "Trabajo" },
-            { q: "Al comprimir un gas en una jeringa, el gas:", a: ["Realiza trabajo", "Recibe trabajo (+W)", "Mantiene su energía"], correct: 1, cat: "Trabajo" },
-            { q: "En un proceso isocórico (volumen constante), el trabajo es:", a: ["Máximo", "Positivo", "Cero"], correct: 2, cat: "Trabajo" },
-            { q: "Al inflarse un globo solo por calor, el gas interno:", a: ["Realiza trabajo de expansión", "Recibe trabajo del entorno", "Es adiabático"], correct: 0, cat: "Trabajo" },
-            { q: "Si pisas una lata vacía y la aplastas, el aire interno:", a: ["Recibe trabajo del entorno", "Realiza trabajo sobre el pie", "Es un sistema aislado"], correct: 0, cat: "Trabajo" },
-            { q: "Si un gas se comprime rápido y su temperatura sube sin entrar calor, es:", a: ["Isotérmico", "Exotérmico", "Adiabático"], correct: 2, cat: "Trabajo" },
-            { q: "Al inflar una llanta, el calentamiento del aire se debe principalmente a:", a: ["Trabajo de compresión", "Calor del ambiente", "Fricción únicamente"], correct: 0, cat: "Trabajo" },
-            { q: "En una expansión libre (al vacío), el trabajo realizado por el gas es:", a: ["Máximo", "Cero", "Negativo"], correct: 1, cat: "Trabajo" },
-            { q: "Si el émbolo de un motor baja por la explosión de la mezcla, el sistema:", a: ["Realiza trabajo (+W)", "Recibe trabajo (-W)", "Es isocórico"], correct: 0, cat: "Trabajo" },
-            { q: "Un resorte comprimido que empuja un gas dentro de un cilindro:", a: ["Realiza trabajo sobre el gas", "Recibe trabajo del gas", "Mantiene su energía"], correct: 0, cat: "Trabajo" },
-            { q: "El área bajo la curva en un diagrama Presión vs Volumen (P-V) representa:", a: ["La Temperatura", "El Trabajo realizado", "La Masa"], correct: 1, cat: "Trabajo" },
-            { q: "Si un pistón se mueve aumentando el volumen, el trabajo (según el sistema) es:", a: ["Positivo", "Negativo", "Cero"], correct: 0, cat: "Trabajo" },
-            { q: "¿En qué proceso el cambio de energía interna es igual al calor (W=0)?", a: ["Isobárico", "Isotérmico", "Isocórico"], correct: 2, cat: "Trabajo" },
-            { q: "Un globo que estalla realiza un trabajo de expansión contra:", a: ["El vacío", "La atmósfera", "Nada"], correct: 1, cat: "Trabajo" },
-            { q: "Cuando un gas se comprime a presión constante, el trabajo es:", a: ["P * (Vfinal - Vinicial)", "Cero", "La mitad de la presión"], correct: 0, cat: "Trabajo" },
+            // SISTEMAS (Abiertos, Cerrados, Aislados)
+            { q: "Una taza de café caliente sin tapa, que libera vapor y calor, es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
+            { q: "Una lata de refresco sellada que puede enfriarse en el refrigerador es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "Un termo de excelente calidad que mantiene la temperatura sin fugas es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 2, cat: "Sistemas" },
+            { q: "El cuerpo humano, al respirar e intercambiar calor con el medio, es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "Un globo inflado y anudado (considerando que no sale aire) es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "Se dice que el Universo es el único sistema perfectamente:", a: ["Abierto", "Cerrado", "Aislado"], correct: 2, cat: "Sistemas" },
+            { q: "Una olla a presión silbando y liberando vapor es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
+            { q: "Una batería de celular sellada que se calienta al usarse es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
+            { q: "Una piscina llena de agua bajo el sol es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 0, cat: "Sistemas" },
+            { q: "Un tanque de gas helio hermético que no permite fugas es un sistema:", a: ["Abierto", "Cerrado", "Aislado"], correct: 1, cat: "Sistemas" },
 
-            // CALOR
-            { q: "¿Cómo se llama el proceso donde el sistema libera calor?", a: ["Endotérmico", "Exotérmico", "Adiabático"], correct: 1, cat: "Calor" },
-            { q: "Si el sistema absorbe calor del entorno, el proceso es:", a: ["Exotérmico", "Endotérmico", "Isotérmico"], correct: 1, cat: "Calor" },
-            { q: "El equilibrio térmico se alcanza cuando dos cuerpos tienen igual:", a: ["Calor", "Masa", "Temperatura"], correct: 2, cat: "Calor" },
-            { q: "La combustión de gasolina en un motor es un proceso:", a: ["Endotérmico", "Exotérmico", "Adiabático"], correct: 1, cat: "Calor" },
-            { q: "La evaporación del sudor en la piel es un proceso:", a: ["Endotérmico (absorbe calor)", "Exotérmico", "Isocórico"], correct: 0, cat: "Calor" },
-            { q: "El calor necesario para elevar la temperatura sin cambiar el estado es:", a: ["Calor latente", "Calor sensible", "Calor específico"], correct: 1, cat: "Calor" },
-            { q: "La transferencia de calor a través de un sólido se llama:", a: ["Convección", "Radiación", "Conducción"], correct: 2, cat: "Calor" },
-            { q: "Si un proceso ocurre a temperatura constante, se denomina:", a: ["Isocórico", "Isotérmico", "Isobárico"], correct: 1, cat: "Calor" },
-            { q: "Un proceso en el que no hay intercambio de calor (Q=0) es:", a: ["Isotérmico", "Adiabático", "Exotérmico"], correct: 1, cat: "Calor" },
-            { q: "Cuando el hielo se derrite a 0°C, absorbe energía llamada:", a: ["Calor sensible", "Calor latente de fusión", "Calor específico"], correct: 1, cat: "Calor" },
-            { q: "La transferencia de calor por movimiento de fluidos (aire o agua) se llama:", a: ["Conducción", "Convección", "Radiación"], correct: 1, cat: "Calor" },
-            { q: "El calor necesario para que 1g de agua suba 1°C de temperatura es una:", a: ["Caloría", "Joule", "Watt"], correct: 0, cat: "Calor" },
-            { q: "¿En qué dirección fluye el calor de forma espontánea?", a: ["De frío a caliente", "De caliente a frío", "En ambas direcciones"], correct: 1, cat: "Calor" },
-            { q: "Un material que no conduce el calor fácilmente es un:", a: ["Conductor térmico", "Aislante térmico", "Semiconductor"], correct: 1, cat: "Calor" },
-            { q: "La radiación térmica se propaga mediante:", a: ["Contacto directo", "Ondas electromagnéticas", "Corrientes de aire"], correct: 1, cat: "Calor" },
+            // FRONTERAS (Adiabáticas, Diatérmicas, Rígidas, Flexibles)
+            { q: "Una hielera de unicel que impide el paso de calor tiene una frontera:", a: ["Diatérmica", "Adiabática", "Semipermeable"], correct: 1, cat: "Fronteras" },
+            { q: "El metal de una cuchara que transmite rápido el calor es una frontera:", a: ["Adiabática", "Diatérmica", "Impermeable"], correct: 1, cat: "Fronteras" },
+            { q: "Una pared de acero que no se deforma ni cambia su volumen es una frontera:", a: ["Flexible", "Rígida", "Permeable"], correct: 1, cat: "Fronteras" },
+            { q: "La pared de un globo que se estira al inflarse es una frontera:", a: ["Rígida", "Flexible", "Adiabática"], correct: 1, cat: "Fronteras" },
+            { q: "Una membrana que permite pasar agua pero no azúcar es una frontera:", a: ["Impermeable", "Semipermeable", "Rígida"], correct: 1, cat: "Fronteras" },
+            { q: "Una frontera que no permite el intercambio de calor se llama:", a: ["Diatérmica", "Adiabática", "Móvil"], correct: 1, cat: "Fronteras" },
+            { q: "El vidrio de una ventana que permite que el sol caliente la habitación es:", a: ["Diatérmico", "Adiabático", "Rígido"], correct: 0, cat: "Fronteras" },
+            { q: "Un traje de bombero está diseñado para ser una frontera principalmente:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
+            { q: "Una pared que impide el paso de cualquier tipo de materia es:", a: ["Impermeable", "Semipermeable", "Diatérmica"], correct: 0, cat: "Fronteras" },
+            { q: "El émbolo de una jeringa que puede subir y bajar es una frontera:", a: ["Rígida", "Móvil o Flexible", "Impermeable"], correct: 1, cat: "Fronteras" },
 
-            // FRONTERAS
-            { q: "Una pared rígida impide que el sistema realice trabajo de:", a: ["Calor", "Expansión/Compresión", "Materia"], correct: 1, cat: "Fronteras" },
-            { q: "Una hielera de unicel es un ejemplo de frontera:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
-            { q: "Una membrana que permite el paso de agua pero no de sal es:", a: ["Impermeable", "Semipermeable", "Rígida"], correct: 1, cat: "Fronteras" },
-            { q: "La pared de un termo de vacío está diseñada para ser:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
-            { q: "Un neumático de coche que se calienta al rodar tiene frontera:", a: ["Diatérmica e Impermeable", "Adiabática y Permeable", "Rígida"], correct: 0, cat: "Fronteras" },
-            { q: "Un tanque de acero que no cambia su forma es una frontera:", a: ["Flexible", "Rígida", "Permeable"], correct: 1, cat: "Fronteras" },
-            { q: "Una frontera que cambia su posición debido a la presión es:", a: ["Rígida", "Flexible o Móvil", "Impermeable"], correct: 1, cat: "Fronteras" },
-            { q: "El papel filtro en un laboratorio es una frontera:", a: ["Impermeable", "Semipermeable", "Adiabática"], correct: 1, cat: "Fronteras" },
-            { q: "Un material aislante como la lana de vidrio forma una frontera:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
-            { q: "Una frontera que permite el equilibrio térmico entre sistemas es:", a: ["Adiabática", "Diatérmica", "Rígida"], correct: 1, cat: "Fronteras" },
-            { q: "Una bolsa de plástico que se deforma al calentarse el aire dentro es:", a: ["Frontera Rígida", "Frontera Flexible", "Frontera Adiabática"], correct: 1, cat: "Fronteras" },
-            { q: "Una frontera que impide totalmente el paso de materia es:", a: ["Impermeable", "Semipermeable", "Diatérmica"], correct: 0, cat: "Fronteras" },
-            { q: "Una frontera flexible y adiabática al mismo tiempo permite:", a: ["Paso de calor", "Cambio de volumen pero no calor", "Paso de masa"], correct: 1, cat: "Fronteras" },
-            { q: "La frontera que permite el paso de luz y calor se considera:", a: ["Adiabática", "Diatérmica", "Impermeable"], correct: 1, cat: "Fronteras" },
-            { q: "Un sistema aislado requiere una frontera impermeable, rígida y:", a: ["Diatérmica", "Adiabática", "Flexible"], correct: 1, cat: "Fronteras" },
-            { q: "El émbolo de una jeringa que se puede mover hacia adentro y afuera es:", a: ["Frontera Móvil", "Frontera Rígida", "Frontera Semipermeable"], correct: 0, cat: "Fronteras" },
-            { q: "Una red de pesca que deja pasar agua pero retiene peces es análoga a:", a: ["Frontera Impermeable", "Frontera Semipermeable", "Frontera Diatérmica"], correct: 1, cat: "Fronteras" }
+            // CALOR Y ENERGÍA TÉRMICA
+            { q: "La energía que se transfiere de un cuerpo caliente a uno frío se llama:", a: ["Temperatura", "Calor", "Energía Interna"], correct: 1, cat: "Calor" },
+            { q: "Un proceso donde el sistema libera energía térmica al entorno se llama:", a: ["Endotérmico", "Exotérmico", "Adiabático"], correct: 1, cat: "Calor" },
+            { q: "Un proceso donde el sistema absorbe energía térmica del entorno es:", a: ["Endotérmico", "Exotérmico", "Aislado"], correct: 0, cat: "Calor" },
+            { q: "La suma de las energías de todas las partículas de un cuerpo se llama:", a: ["Calor", "Energía Térmica o Interna", "Temperatura"], correct: 1, cat: "Calor" },
+            { q: "Sentir el calor del Sol en la cara es transferencia por:", a: ["Conducción", "Convección", "Radiación"], correct: 2, cat: "Calor" },
+            { q: "Quemarse la mano al tocar un sartén caliente es transferencia por:", a: ["Conducción", "Convección", "Radiación"], correct: 0, cat: "Calor" },
+            { q: "El aire caliente sube y el frío baja en una habitación por:", a: ["Conducción", "Convección", "Radiación"], correct: 1, cat: "Calor" },
+            { q: "Cuando dos cuerpos alcanzan la misma temperatura, están en:", a: ["Caos térmico", "Equilibrio térmico", "Punto de ebullición"], correct: 1, cat: "Calor" },
+            { q: "La unidad de energía que solemos ver en las etiquetas de alimentos es:", a: ["Joule", "Caloría", "Watt"], correct: 1, cat: "Calor" },
+            { q: "La unidad oficial de energía en el Sistema Internacional es el:", a: ["Joule (Julio)", "Caloría", "Grado"], correct: 0, cat: "Calor" },
+
+            // TEMPERATURA Y ESCALAS
+            { q: "La medida del promedio de agitación o movimiento de las moléculas es la:", a: ["Masa", "Energía", "Temperatura"], correct: 2, cat: "Temperatura" },
+            { q: "La escala de temperatura que se usa oficialmente en la ciencia es:", a: ["Celsius", "Kelvin", "Fahrenheit"], correct: 1, cat: "Temperatura" },
+            { q: "En la escala Celsius, el agua se congela a:", a: ["32 grados", "0 grados", "273 grados"], correct: 1, cat: "Temperatura" },
+            { q: "El 'Cero Absoluto' (donde no hay movimiento molecular) corresponde a:", a: ["0° Celsius", "0 Kelvin", "0° Fahrenheit"], correct: 1, cat: "Temperatura" },
+            { q: "Si un termómetro marca 273 Kelvin, en grados Celsius equivale a:", a: ["100°C", "0°C", "-273°C"], correct: 1, cat: "Temperatura" },
+            { q: "La escala de temperatura más común en Estados Unidos es la:", a: ["Celsius", "Fahrenheit", "Kelvin"], correct: 1, cat: "Temperatura" },
+            { q: "El punto de ebullición del agua en la escala Celsius es:", a: ["100°C", "212°C", "373°C"], correct: 0, cat: "Temperatura" },
+            { q: "¿Cuál de estas escalas NO utiliza el símbolo de grados (°)?", a: ["Celsius", "Fahrenheit", "Kelvin"], correct: 2, cat: "Temperatura" },
+            { q: "Si la temperatura de un gas aumenta, sus moléculas se mueven:", a: ["Más lento", "Igual", "Más rápido"], correct: 2, cat: "Temperatura" },
+            { q: "La escala Kelvin se considera una escala de tipo:", a: ["Relativa", "Absoluta", "Inversa"], correct: 1, cat: "Temperatura" },
+
+            // REPASO GENERAL
+            { q: "Un material como el cobre es un excelente conductor:", a: ["Térmico", "Adiabático", "Aislante"], correct: 0, cat: "General" },
+            { q: "La madera y el plástico se usan en mangos de sartenes porque son:", a: ["Conductores", "Aislantes térmicos", "Diatérmicos"], correct: 1, cat: "General" },
+            { q: "Para que exista flujo de calor entre dos cuerpos, debe haber distinta:", a: ["Masa", "Forma", "Temperatura"], correct: 2, cat: "General" },
+            { q: "Si un termo se rompe y entra aire al vacío, deja de ser:", a: ["Cerrado", "Aislado", "Abierto"], correct: 1, cat: "General" },
+            { q: "Cuando sudamos, nuestro cuerpo busca bajar la temperatura mediante:", a: ["Radiación", "Evaporación (absorbe calor)", "Conducción"], correct: 1, cat: "General" }
         ];
 
         const ROWS = 7;
@@ -279,7 +264,6 @@
                         </p>
                     </div>
 
-                    {/* QUIZ OVERLAY: El objetivo es que la pregunta siempre sea visible cuando aparece */}
                     {activeQuiz && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 quiz-overlay animate-in fade-in duration-300">
                             <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border-t-8 border-indigo-500 animate-in slide-in-from-bottom-10">
@@ -322,7 +306,7 @@
 
                     <footer className="mt-4 flex justify-between items-center bg-white p-3 rounded-2xl shadow-sm hidden md:flex">
                          <div className="flex gap-4 text-[9px] font-black uppercase text-slate-400 italic">
-                            <span>Sistemas: Abierto/Cerrado</span>
+                            <span>Sistemas: Abierto/Cerrado/Aislado</span>
                             <span>Fronteras: Adiabática/Diatérmica</span>
                          </div>
                          <div className="text-[10px] font-black text-indigo-600 uppercase">
